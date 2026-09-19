@@ -49,6 +49,15 @@ export default function Console() {
   };
 
   const call = calls.find((c) => c.id === selected);
+
+  useEffect(() => {
+    if (!call || call.triage || call.turns.length < 2 || call.live) return;
+    fetch("/api/summarize", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ call_id: call.id }),
+    }).then(load);
+  }, [call?.id, call?.triage, call?.turns.length, call?.live, load]);
   const callActions = actions.filter((a) => a.callId === selected);
   const pendingCount = actions.filter((a) => a.status === "proposed").length;
   const actionsFor = (id) => actions.filter((a) => a.callId === id);
@@ -140,6 +149,29 @@ export default function Console() {
                   {fmtTime(call.startedAt)} &middot; {fmtDur(call.startedAt, call.endedAt)}
                 </span>
               </div>
+
+              {call.triage && (
+                <div className="mt-6 rounded-lg border border-ink-200 bg-white p-4 animate-arrive">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono text-[11px] uppercase tracking-widest text-ink-400">
+                      triage
+                    </span>
+                    <span
+                      className={`font-mono text-[11px] px-2 py-0.5 rounded-full border ${
+                        call.triage.urgency === "high"
+                          ? "bg-accent-100 text-accent-dark border-accent-200"
+                          : "bg-ink-100 text-ink-600 border-ink-200"
+                      }`}
+                    >
+                      {call.triage.urgency}
+                    </span>
+                    <span className="ml-auto font-mono text-[11px] text-ink-400">
+                      via {call.triage.by}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-ink-900 leading-relaxed">{call.triage.summary}</p>
+                </div>
+              )}
 
               {callActions.length > 0 && (
                 <div className="mt-6 space-y-3">
