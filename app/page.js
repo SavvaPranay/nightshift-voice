@@ -117,8 +117,8 @@ export default function Console() {
   const actionsFor = (id) => actions.filter((a) => a.callId === id);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b border-ink-200 bg-white/70 backdrop-blur px-6 py-4 flex items-baseline gap-4 flex-wrap">
+    <div className="h-screen flex flex-col overflow-hidden">
+      <header className="shrink-0 border-b border-ink-200 bg-white/70 backdrop-blur px-6 py-4 flex items-baseline gap-4 flex-wrap">
         <h1 className="font-display text-2xl tracking-tight">Iris</h1>
         <p className="text-ink-500 text-sm">Northside Dental &middot; after hours</p>
         <div className="ml-auto flex items-center gap-3">
@@ -137,9 +137,9 @@ export default function Console() {
         </div>
       </header>
 
-      <main className="flex-1 grid grid-cols-1 md:grid-cols-[320px_1fr]">
+      <main className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[320px_1fr]">
         {/* Call list */}
-        <aside className="border-r border-ink-200 bg-ink-100/50">
+        <aside className="border-r border-ink-200 bg-ink-100/50 overflow-y-auto min-h-0">
           <div className="px-5 py-3 text-[11px] uppercase tracking-widest text-ink-400 font-mono">
             Calls
           </div>
@@ -190,9 +190,9 @@ export default function Console() {
         </aside>
 
         {/* Transcript + actions */}
-        <section className="p-6 md:p-8 max-w-3xl">
+        <section className="flex flex-col min-h-0 overflow-hidden">
           {!call ? (
-            <div className="max-w-md">
+            <div className="max-w-md p-6 md:p-8">
               <h2 className="font-display text-3xl">Waiting for calls</h2>
               <p className="mt-3 text-ink-500 leading-relaxed">
                 Everything here is real. Calls appear as they come in, and anything the
@@ -202,6 +202,7 @@ export default function Console() {
             </div>
           ) : (
             <>
+              <div className="shrink-0 px-6 md:px-8 pt-6 md:pt-8 pb-4 max-w-3xl">
               <div className="flex items-baseline gap-3 flex-wrap">
                 <h2 className="font-display text-3xl">{call.from}</h2>
                 {call.live && (
@@ -277,7 +278,10 @@ export default function Console() {
                 </div>
               )}
 
-              <ol className="mt-8 space-y-4 border-l border-ink-200 pl-5">
+              </div>
+
+              <div className="flex-1 min-h-0 overflow-y-auto px-6 md:px-8 pb-6 max-w-3xl">
+              <ol className="space-y-4 border-l border-ink-200 pl-5">
                 {call.turns.map((t, i) => (
                   <li key={i} className="relative animate-arrive">
                     <span
@@ -306,15 +310,16 @@ export default function Console() {
                   </li>
                 ))}
               </ol>
+              </div>
 
-              <div className="mt-10 border-t border-ink-200 pt-6">
+              <div className="shrink-0 border-t border-ink-200 bg-white px-6 md:px-8 py-4 max-w-3xl">
                 <div className="flex items-baseline gap-2 flex-wrap">
                   <h3 className="font-display text-xl">After the call</h3>
                   <span className="font-mono text-[11px] text-ink-400">powered by Mel</span>
                 </div>
 
                 {call.triage ? (
-                  <div className="mt-3 rounded-lg border border-ink-200 bg-white p-4">
+                  <div className="mt-2 rounded-lg border border-ink-200 bg-ink-50 p-3">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-mono text-[11px] uppercase tracking-widest text-ink-400">
                         triage
@@ -341,7 +346,7 @@ export default function Console() {
                 )}
 
                 {thread.length > 0 && (
-                  <div className="mt-4 space-y-3">
+                  <div className="mt-3 space-y-3 max-h-40 overflow-y-auto">
                     {thread.map((t, i) => (
                       <div key={i} className="animate-arrive">
                         <div className="font-mono text-[11px] uppercase tracking-widest text-ink-400">
@@ -359,7 +364,7 @@ export default function Console() {
                   </div>
                 )}
 
-                <form onSubmit={askMel} className="mt-4 flex gap-2">
+                <form onSubmit={askMel} className="mt-3 flex gap-2">
                   <input
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
