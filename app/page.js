@@ -10,11 +10,18 @@ const fmtDur = (a, b) => {
   return `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, "0")}s`;
 };
 
+const URGENCY_STYLES = {
+  high:   "bg-accent-100 text-accent-dark border-accent-200",
+  medium: "bg-ink-100 text-ink-600 border-ink-200",
+  low:    "bg-ink-50 text-ink-400 border-ink-200",
+};
+
 export default function Console() {
   const [calls, setCalls] = useState([]);
   const [actions, setActions] = useState([]);
   const [selected, setSelected] = useState(null);
   const [busy, setBusy] = useState(null);
+  const [summing, setSumming] = useState(null);
 
   const load = useCallback(async () => {
     const r = await fetch("/api/calls", { cache: "no-store" });
@@ -67,6 +74,11 @@ export default function Console() {
           <div className="px-5 py-3 text-[11px] uppercase tracking-widest text-ink-400 font-mono">
             Calls
           </div>
+          {calls.length === 0 && (
+            <p className="px-5 py-4 text-sm text-ink-400 leading-relaxed">
+              No calls yet. Iris is on the line and waiting.
+            </p>
+          )}
           <ul>
             {calls.map((c) => {
               const pend = actionsFor(c.id).filter((a) => a.status === "proposed").length;
@@ -107,7 +119,14 @@ export default function Console() {
         {/* Transcript + actions */}
         <section className="p-6 md:p-8 max-w-3xl">
           {!call ? (
-            <p className="text-ink-400">No calls yet.</p>
+            <div className="max-w-md">
+              <h2 className="font-display text-3xl">Waiting for calls</h2>
+              <p className="mt-3 text-ink-500 leading-relaxed">
+                Everything here is real. Calls appear as they come in, and anything the
+                agent could not do on its own shows up as a pending action for you to
+                approve.
+              </p>
+            </div>
           ) : (
             <>
               <div className="flex items-baseline gap-3 flex-wrap">
