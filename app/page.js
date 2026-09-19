@@ -49,7 +49,7 @@ export default function Console() {
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b border-ink-200 bg-white/70 backdrop-blur px-6 py-4 flex items-baseline gap-4 flex-wrap">
-        <h1 className="font-display text-2xl tracking-tight">Switchboard</h1>
+        <h1 className="font-display text-2xl tracking-tight">Iris</h1>
         <p className="text-ink-500 text-sm">Northside Dental &middot; after hours</p>
         <div className="ml-auto flex items-center gap-3">
           {pendingCount > 0 && (
@@ -57,7 +57,7 @@ export default function Console() {
               {pendingCount} awaiting you
             </span>
           )}
-          <span className="text-xs text-ink-400 font-mono">pranay@switchboard</span>
+          <span className="text-xs text-ink-400 font-mono">pranay@iris</span>
         </div>
       </header>
 

@@ -9,7 +9,7 @@ const instrumentSerif = Instrument_Serif({
 });
 
 export const metadata = {
-  title: "Switchboard — after-hours call console",
+  title: "Iris, the after-hours call console",
   description:
     "Voice agents can talk. They can't be trusted to act. This is the approval layer.",
 };
