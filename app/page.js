@@ -74,7 +74,7 @@ export default function Console() {
       const r = await fetch("/api/ask", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ call_id: selected, question }),
+        body: JSON.stringify({ call_id: selected, question, history: thread }),
       });
       const d = await r.json();
       setThread((t) => [...t, { role: "mel", text: d.answer, by: d.by }]);
