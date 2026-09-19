@@ -27,6 +27,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error(code, ...m) { console.error("[auth:error]", code, JSON.stringify(m)?.slice(0, 1200)); },
     warn(code) { console.warn("[auth:warn]", code); },
   },
+  // On production the SSOJet redirect chain can drop sameSite=lax cookies,
+  // which arrives as OAuthCallbackError because state/nonce/pkce are missing.
+  // sameSite=none survives the cross-site hop; it requires secure, which https gives us.
+  cookies:
+    process.env.NODE_ENV === "production"
+      ? {
+          state: { name: "__Secure-authjs.state", options: { httpOnly: true, sameSite: "none", path: "/", secure: true } },
+          nonce: { name: "__Secure-authjs.nonce", options: { httpOnly: true, sameSite: "none", path: "/", secure: true } },
+          pkceCodeVerifier: { name: "__Secure-authjs.pkce.code_verifier", options: { httpOnly: true, sameSite: "none", path: "/", secure: true } },
+        }
+      : undefined,
   pages: { signIn: "/signin" },
   callbacks: {
     session({ session, token }) {
