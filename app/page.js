@@ -21,6 +21,9 @@ export default function Console() {
   const [actions, setActions] = useState([]);
   const [selected, setSelected] = useState(null);
   const [busy, setBusy] = useState(null);
+  const [q, setQ] = useState("");
+  const [thread, setThread] = useState([]);
+  const [asking, setAsking] = useState(false);
   const [summing, setSumming] = useState(null);
 
   const load = useCallback(async () => {
@@ -48,6 +51,8 @@ export default function Console() {
     setBusy(null);
   };
 
+  useEffect(() => { setThread([]); setQ(""); }, [selected]);
+
   const call = calls.find((c) => c.id === selected);
 
   useEffect(() => {
@@ -58,6 +63,27 @@ export default function Console() {
       body: JSON.stringify({ call_id: call.id }),
     }).then(load);
   }, [call?.id, call?.triage, call?.turns.length, call?.live, load]);
+  const askMel = async (e) => {
+    e.preventDefault();
+    const question = q.trim();
+    if (!question || asking) return;
+    setQ("");
+    setThread((t) => [...t, { role: "you", text: question }]);
+    setAsking(true);
+    try {
+      const r = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ call_id: selected, question }),
+      });
+      const d = await r.json();
+      setThread((t) => [...t, { role: "mel", text: d.answer, by: d.by }]);
+    } catch {
+      setThread((t) => [...t, { role: "mel", text: "Could not reach Mel.", by: "none" }]);
+    }
+    setAsking(false);
+  };
+
   const callActions = actions.filter((a) => a.callId === selected);
   const pendingCount = actions.filter((a) => a.status === "proposed").length;
   const actionsFor = (id) => actions.filter((a) => a.callId === id);
@@ -150,29 +176,6 @@ export default function Console() {
                 </span>
               </div>
 
-              {call.triage && (
-                <div className="mt-6 rounded-lg border border-ink-200 bg-white p-4 animate-arrive">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-mono text-[11px] uppercase tracking-widest text-ink-400">
-                      triage
-                    </span>
-                    <span
-                      className={`font-mono text-[11px] px-2 py-0.5 rounded-full border ${
-                        call.triage.urgency === "high"
-                          ? "bg-accent-100 text-accent-dark border-accent-200"
-                          : "bg-ink-100 text-ink-600 border-ink-200"
-                      }`}
-                    >
-                      {call.triage.urgency}
-                    </span>
-                    <span className="ml-auto font-mono text-[11px] text-ink-400">
-                      via {call.triage.by}
-                    </span>
-                  </div>
-                  <p className="mt-2 text-ink-900 leading-relaxed">{call.triage.summary}</p>
-                </div>
-              )}
-
               {callActions.length > 0 && (
                 <div className="mt-6 space-y-3">
                   {callActions.map((a) => {
@@ -264,6 +267,74 @@ export default function Console() {
                   </li>
                 ))}
               </ol>
+
+              <div className="mt-10 border-t border-ink-200 pt-6">
+                <div className="flex items-baseline gap-2 flex-wrap">
+                  <h3 className="font-display text-xl">After the call</h3>
+                  <span className="font-mono text-[11px] text-ink-400">powered by Mel</span>
+                </div>
+
+                {call.triage ? (
+                  <div className="mt-3 rounded-lg border border-ink-200 bg-white p-4">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono text-[11px] uppercase tracking-widest text-ink-400">
+                        triage
+                      </span>
+                      <span
+                        className={`font-mono text-[11px] px-2 py-0.5 rounded-full border ${
+                          call.triage.urgency === "high"
+                            ? "bg-accent-100 text-accent-dark border-accent-200"
+                            : "bg-ink-100 text-ink-600 border-ink-200"
+                        }`}
+                      >
+                        {call.triage.urgency}
+                      </span>
+                      <span className="ml-auto font-mono text-[11px] text-ink-400">
+                        via {call.triage.by}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-ink-900 leading-relaxed">{call.triage.summary}</p>
+                  </div>
+                ) : (
+                  <p className="mt-3 text-sm text-ink-400">
+                    Not enough was said on this call to summarize.
+                  </p>
+                )}
+
+                {thread.length > 0 && (
+                  <div className="mt-4 space-y-3">
+                    {thread.map((t, i) => (
+                      <div key={i} className="animate-arrive">
+                        <div className="font-mono text-[11px] uppercase tracking-widest text-ink-400">
+                          {t.role === "you" ? "you" : `mel${t.by && t.by !== "mel" ? ` (${t.by})` : ""}`}
+                        </div>
+                        <p
+                          className={`mt-0.5 leading-relaxed ${
+                            t.role === "you" ? "text-ink-600" : "text-ink-900"
+                          }`}
+                        >
+                          {t.text}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <form onSubmit={askMel} className="mt-4 flex gap-2">
+                  <input
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    placeholder="Ask about this call or the caller"
+                    className="flex-1 min-w-0 px-3 py-2 rounded-md border border-ink-300 bg-white text-ink-900 placeholder:text-ink-400 focus:outline-none focus:border-ink-500"
+                  />
+                  <button
+                    disabled={asking || !q.trim()}
+                    className="px-4 py-2 rounded-md bg-ink-900 text-ink-50 text-sm hover:bg-ink-800 disabled:opacity-40 transition-colors"
+                  >
+                    {asking ? "Asking" : "Ask Mel"}
+                  </button>
+                </form>
+              </div>
             </>
           )}
         </section>
