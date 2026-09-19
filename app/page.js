@@ -24,6 +24,7 @@ export default function Console() {
   const [q, setQ] = useState("");
   const [thread, setThread] = useState([]);
   const [asking, setAsking] = useState(false);
+  const [me, setMe] = useState(null);
   const [summing, setSumming] = useState(null);
 
   const load = useCallback(async () => {
@@ -32,6 +33,13 @@ export default function Console() {
     setCalls(d.calls);
     setActions(d.actions);
     setSelected((s) => s ?? d.calls[0]?.id ?? null);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then((r) => r.json())
+      .then((d) => setMe(d?.user?.email ?? null))
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -63,6 +71,17 @@ export default function Console() {
       body: JSON.stringify({ call_id: call.id }),
     }).then(load);
   }, [call?.id, call?.triage, call?.turns.length, call?.live, load]);
+  const signOut = async () => {
+    const { csrfToken } = await fetch("/api/auth/csrf").then((r) => r.json());
+    const body = new URLSearchParams({ csrfToken, callbackUrl: "/signin" });
+    await fetch("/api/auth/signout", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body,
+    });
+    window.location.href = "/signin";
+  };
+
   const askMel = async (e) => {
     e.preventDefault();
     const question = q.trim();
@@ -99,7 +118,13 @@ export default function Console() {
               {pendingCount} awaiting you
             </span>
           )}
-          <span className="text-xs text-ink-400 font-mono">pranay@iris</span>
+          <span className="text-xs text-ink-400 font-mono">{me ?? "signed in"}</span>
+          <button
+            onClick={signOut}
+            className="text-xs font-mono px-2.5 py-1 rounded-full border border-ink-300 text-ink-600 hover:bg-ink-200 transition-colors"
+          >
+            sign out
+          </button>
         </div>
       </header>
 
