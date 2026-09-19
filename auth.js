@@ -8,6 +8,7 @@ const configured = Boolean(
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   trustHost: true,
+  debug: process.env.AUTH_DEBUG === "1",
   providers: configured
     ? [
         {
@@ -18,10 +19,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           clientId: process.env.SSOJET_CLIENT_ID,
           clientSecret: process.env.SSOJET_CLIENT_SECRET,
           authorization: { params: { scope: "openid profile email" } },
-          checks: ["pkce", "state"],
+          checks: ["pkce", "state", "nonce"],
         },
       ]
     : [],
+  logger: {
+    error(code, ...m) { console.error("[auth:error]", code, JSON.stringify(m)?.slice(0, 1200)); },
+    warn(code) { console.warn("[auth:warn]", code); },
+  },
   pages: { signIn: "/signin" },
   callbacks: {
     session({ session, token }) {
