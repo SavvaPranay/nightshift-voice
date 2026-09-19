@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 const fmtTime = (ts) =>
   new Date(ts).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
@@ -25,6 +25,7 @@ export default function Console() {
   const [thread, setThread] = useState([]);
   const [asking, setAsking] = useState(false);
   const [me, setMe] = useState(null);
+  const seenLive = useRef(new Set());
   const [summing, setSumming] = useState(null);
 
   const load = useCallback(async () => {
@@ -33,7 +34,14 @@ export default function Console() {
     setCalls(d.calls);
     setActions(d.actions);
     const liveCall = d.calls.find((c) => c.live);
-    setSelected((s) => (liveCall ? liveCall.id : s ?? d.calls[0]?.id ?? null));
+    setSelected((s) => {
+      // jump to a live call only when it is one we have not seen before
+      if (liveCall && !seenLive.current.has(liveCall.id)) {
+        seenLive.current.add(liveCall.id);
+        return liveCall.id;
+      }
+      return s ?? d.calls[0]?.id ?? null;
+    });
   }, []);
 
   useEffect(() => {
