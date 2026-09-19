@@ -202,7 +202,7 @@ export default function Console() {
             </div>
           ) : (
             <>
-              <div className="shrink-0 px-6 md:px-8 pt-6 md:pt-8 pb-4 max-w-3xl">
+              <div className="shrink-0 px-6 md:px-8 pt-6 md:pt-8 pb-4 max-w-5xl">
               <div className="flex items-baseline gap-3 flex-wrap">
                 <h2 className="font-display text-3xl">{call.from}</h2>
                 {call.live && (
@@ -280,7 +280,7 @@ export default function Console() {
 
               </div>
 
-              <div className="flex-1 min-h-0 overflow-y-auto px-6 md:px-8 pb-6 max-w-3xl">
+              <div className="flex-1 min-h-0 overflow-y-auto px-6 md:px-8 pb-6 max-w-5xl">
               <ol className="space-y-4 border-l border-ink-200 pl-5">
                 {call.turns.map((t, i) => (
                   <li key={i} className="relative animate-arrive">
@@ -312,7 +312,7 @@ export default function Console() {
               </ol>
               </div>
 
-              <div className="shrink-0 border-t border-ink-200 bg-white px-6 md:px-8 py-4 max-w-3xl">
+              <div className="shrink-0 border-t border-ink-200 bg-white px-6 md:px-8 py-4 max-w-5xl">
                 <div className="flex items-baseline gap-2 flex-wrap">
                   <h3 className="font-display text-xl">After the call</h3>
                   <span className="font-mono text-[11px] text-ink-400">powered by Mel</span>
