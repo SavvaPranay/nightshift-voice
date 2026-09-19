@@ -32,7 +32,8 @@ export default function Console() {
     const d = await r.json();
     setCalls(d.calls);
     setActions(d.actions);
-    setSelected((s) => s ?? d.calls[0]?.id ?? null);
+    const liveCall = d.calls.find((c) => c.live);
+    setSelected((s) => (liveCall ? liveCall.id : s ?? d.calls[0]?.id ?? null));
   }, []);
 
   useEffect(() => {
@@ -44,7 +45,7 @@ export default function Console() {
 
   useEffect(() => {
     load();
-    const t = setInterval(load, 3000);
+    const t = setInterval(load, 1500);
     return () => clearInterval(t);
   }, [load]);
 
@@ -148,14 +149,16 @@ export default function Console() {
                   <button
                     onClick={() => setSelected(c.id)}
                     className={`w-full text-left px-5 py-3.5 border-l-2 transition-colors animate-arrive ${
-                      active
+                      c.live
+                        ? "border-l-sage bg-sage-50/60"
+                        : active
                         ? "border-l-accent bg-white"
                         : "border-l-transparent hover:bg-white/60"
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       {c.live && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-accent animate-livepulse" />
+                        <span className="w-2 h-2 rounded-full bg-sage animate-livepulse" />
                       )}
                       <span className="font-mono text-sm text-ink-900">{c.from}</span>
                     </div>
@@ -163,11 +166,13 @@ export default function Console() {
                       <span className="font-mono">{fmtTime(c.startedAt)}</span>
                       <span className="text-ink-300">&middot;</span>
                       <span className="font-mono">{fmtDur(c.startedAt, c.endedAt)}</span>
-                      {pend > 0 && (
+                      {c.live ? (
+                        <span className="ml-auto text-sage font-medium">live</span>
+                      ) : pend > 0 ? (
                         <span className="ml-auto text-accent-dark font-medium">
                           {pend} pending
                         </span>
-                      )}
+                      ) : null}
                     </div>
                   </button>
                 </li>
@@ -192,7 +197,8 @@ export default function Console() {
               <div className="flex items-baseline gap-3 flex-wrap">
                 <h2 className="font-display text-3xl">{call.from}</h2>
                 {call.live && (
-                  <span className="text-xs font-mono text-accent-dark bg-accent-100 border border-accent-200 px-2 py-0.5 rounded-full">
+                  <span className="inline-flex items-center gap-1.5 text-xs font-mono text-sage bg-sage-50 border border-sage-200 px-2.5 py-0.5 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-sage animate-livepulse" />
                     live
                   </span>
                 )}
